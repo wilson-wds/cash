@@ -3,301 +3,231 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>線上借款申請與簽名系統</title>
-    <!-- 引入 Tailwind CSS 以進行快速且美觀的樣式設計 -->
+    <title>現金收入分配器</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- 引入 Google Fonts 的 Inter 字體 -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        /* 自訂樣式 */
+        /* Custom font for Inter, if not already handled by Tailwind defaults or system */
+        html {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Basic styling adjustments for better aesthetics */
         body {
-            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+            background-color: #f3f4f6; /* Light gray background */
         }
-        /* 簽名板的邊框樣式 */
-        #signature-pad {
-            border: 2px dashed #cbd5e1;
-            touch-action: none; /* 禁用觸控滑動等預設行為 */
+        .container {
+            max-width: 90%; /* Responsive width */
+            margin: auto;
+            padding: 1rem; /* Padding for mobile */
         }
-        /* 步驟標題樣式 */
-        .step-title {
-            @apply text-2xl font-bold text-gray-800 mb-4 pb-2 border-b-2 border-blue-500;
+        @media (min-width: 640px) { /* Small screens and up */
+            .container {
+                max-width: 600px; /* Max width for desktop */
+                padding: 2rem; /* More padding on larger screens */
+            }
+        }
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type="number"] {
+            -moz-appearance: textfield;
         }
     </style>
 </head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4 sm:p-6 lg:p-8">
+<body class="flex items-center justify-center min-h-screen">
+    <div class="container bg-white p-6 md:p-8 rounded-lg shadow-xl border border-gray-200">
+        <h1 class="text-3xl md:text-4xl font-bold text-center mb-6 text-gray-800">現金收入分配器</h1>
 
-    <div class="w-full max-w-4xl bg-white rounded-2xl shadow-xl p-6 sm:p-8 lg:p-10 space-y-10">
-        <header class="text-center">
-            <h1 class="text-3xl sm:text-4xl font-bold text-gray-900">線上借款申請</h1>
-            <p class="mt-2 text-gray-600">請依序完成以下步驟，流程快速又安全。</p>
-        </header>
+        <div class="space-y-4">
+            <!-- Cash Income Input -->
+            <div>
+                <label for="cashIncome" class="block text-lg font-medium text-gray-700 mb-2">現金收入 (TWD)</label>
+                <input type="number" id="cashIncome" placeholder="輸入您的總收入"
+                       class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 text-lg">
+            </div>
 
-        <!-- 步驟一：填寫基本資料 -->
-        <section id="form-section">
-            <h2 class="step-title">
-                <span class="bg-blue-500 text-white rounded-full w-8 h-8 inline-flex items-center justify-center mr-3">1</span>
-                填寫基本資料
-            </h2>
-            <form id="loan-form" class="space-y-4">
+            <!-- Percentage Inputs -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                    <label for="name" class="block text-sm font-medium text-gray-700">姓名</label>
-                    <input type="text" id="name" name="name" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                </div>
-                <div>
-                    <label for="phone" class="block text-sm font-medium text-gray-700">聯絡電話</label>
-                    <input type="tel" id="phone" name="phone" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    <label for="debtPercent" class="block text-base font-medium text-gray-700 mb-2">還債 (%)</label>
+                    <input type="number" id="debtPercent" value="40" min="0" max="100"
+                           class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 text-lg">
                 </div>
                 <div>
-                    <label for="loan-amount" class="block text-sm font-medium text-gray-700">期望借款金額 (元)</label>
-                    <input type="number" id="loan-amount" name="loan-amount" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    <label for="savingsPercent" class="block text-base font-medium text-gray-700 mb-2">儲蓄 (%)</label>
+                    <input type="number" id="savingsPercent" value="30" min="0" max="100"
+                           class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 text-lg">
                 </div>
-            </form>
-        </section>
-
-        <!-- 步驟二：視訊對保 -->
-        <section id="video-section">
-            <h2 class="step-title">
-                <span class="bg-blue-500 text-white rounded-full w-8 h-8 inline-flex items-center justify-center mr-3">2</span>
-                視訊對保
-            </h2>
-            <div class="bg-gray-200 rounded-lg p-4 text-center">
-                <p class="text-gray-600 mb-4">請點擊下方按鈕開啟視訊鏡頭，並確保您的臉部清晰可見。</p>
-                <!-- 視訊畫面將會顯示在這裡 -->
-                <video id="video-feed" class="w-full max-w-md mx-auto rounded-lg bg-black hidden" autoplay playsinline></video>
-                <div id="video-placeholder" class="w-full max-w-md h-64 mx-auto rounded-lg bg-gray-900 flex items-center justify-center text-white">
-                    攝影機畫面預覽
-                </div>
-                <button id="start-video-btn" class="mt-4 px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-75 transition duration-200">
-                    開啟視訊鏡頭
-                </button>
-            </div>
-        </section>
-
-        <!-- 步驟三：線上簽署文件 -->
-        <section id="signature-section">
-            <h2 class="step-title">
-                <span class="bg-blue-500 text-white rounded-full w-8 h-8 inline-flex items-center justify-center mr-3">3</span>
-                線上簽署文件
-            </h2>
-            <div class="bg-gray-50 p-4 rounded-lg border">
-                <h3 class="font-bold text-lg mb-2">借款合約預覽</h3>
-                <div class="w-full h-40 overflow-y-auto border rounded-md p-3 bg-white text-sm text-gray-600">
-                    <p>立合約書人（以下簡稱「借款人」）茲向（以下簡稱「貸款機構」）申請借款，雙方爰訂定本借款合約（以下簡稱「本合約」），並同意遵守下列條款：</p>
-                    <p class="mt-2">第一條：借款金額。貸款機構同意貸與借款人新台幣___________元整。</p>
-                    <p class="mt-2">第二條：借款利率。本借款依年利率_____%計算利息。</p>
-                    <p class="mt-2">第三條：還款方式。借款人應自借款日起，每月依約定方式攤還本息。</p>
-                    <p class="mt-2">[...其餘條款略...]</p>
-                    <p class="mt-4">本人已詳閱並充分理解以上所有條款，並同意受其約束。</p>
+                <div>
+                    <label for="disposablePercent" class="block text-base font-medium text-gray-700 mb-2">可用 (%)</label>
+                    <input type="number" id="disposablePercent" value="30" min="0" max="100"
+                           class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 text-lg">
                 </div>
             </div>
-            <div class="mt-4">
-                <p class="text-center text-gray-600 mb-2">請在下方白色方框內簽署您的姓名：</p>
-                <!-- 簽名畫布 -->
-                <canvas id="signature-pad" class="w-full h-48 bg-white rounded-lg shadow-inner"></canvas>
-                <div class="flex justify-center items-center gap-4 mt-4">
-                    <button id="clear-signature-btn" class="px-6 py-2 bg-gray-500 text-white font-semibold rounded-lg shadow-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-75 transition duration-200">
-                        清除簽名
-                    </button>
-                </div>
-            </div>
-        </section>
 
-        <!-- 提交按鈕 -->
-        <footer class="text-center pt-6 border-t">
-            <button id="submit-btn" class="w-full sm:w-auto px-12 py-3 bg-green-600 text-white font-bold text-lg rounded-lg shadow-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-75 transition transform hover:scale-105 duration-300">
-                確認提交申請
+            <!-- Calculate Button -->
+            <button id="calculateBtn"
+                    class="w-full mt-6 py-3 px-6 border border-transparent rounded-md shadow-sm text-lg font-semibold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out">
+                計算分配
             </button>
-            <div id="success-message" class="hidden mt-4 p-4 bg-green-100 text-green-800 rounded-lg">
-                申請已成功提交！我們將盡快與您聯繫。
-            </div>
-        </footer>
+        </div>
 
+        <!-- Results Display -->
+        <div class="mt-8 pt-6 border-t border-gray-200 space-y-4">
+            <h2 class="text-2xl font-bold text-gray-800 text-center mb-4">分配結果</h2>
+
+            <div class="bg-gray-50 p-4 rounded-md shadow-sm">
+                <p class="text-base text-gray-600 font-medium flex justify-between items-center">
+                    總百分比: <span id="totalPercentage" class="text-indigo-600 text-lg font-semibold">100%</span>
+                </p>
+                <p class="text-sm text-gray-500 flex justify-between items-center mt-1">
+                    差異: <span id="percentageDifference" class="text-red-500 text-base font-medium">0% (完美分配)</span>
+                </p>
+            </div>
+
+            <div class="bg-indigo-50 p-4 rounded-md shadow-sm">
+                <p class="text-lg font-medium text-gray-700 flex justify-between items-center">
+                    還債金額: <span id="debtAmount" class="text-indigo-700 text-xl font-bold">0 TWD</span>
+                </p>
+            </div>
+            <div class="bg-green-50 p-4 rounded-md shadow-sm">
+                <p class="text-lg font-medium text-gray-700 flex justify-between items-center">
+                    儲蓄金額: <span id="savingsAmount" class="text-green-700 text-xl font-bold">0 TWD</span>
+                </p>
+            </div>
+            <div class="bg-yellow-50 p-4 rounded-md shadow-sm">
+                <p class="text-lg font-medium text-gray-700 flex justify-between items-center">
+                    可用金額: <span id="disposableAmount" class="text-yellow-700 text-xl font-bold">0 TWD</span>
+                </p>
+            </div>
+
+            <!-- Error/Message Box -->
+            <div id="messageBox" class="hidden mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-md" role="alert">
+                <p id="messageText" class="text-sm"></p>
+            </div>
+        </div>
     </div>
 
     <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        // --- 視訊功能 ---
-        const videoBtn = document.getElementById('start-video-btn');
-        const videoElement = document.getElementById('video-feed');
-        const videoPlaceholder = document.getElementById('video-placeholder');
-        
-        videoBtn.addEventListener('click', async () => {
-            // 檢查瀏覽器是否支援 getUserMedia
-            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                try {
-                    // 請求存取攝影機
-                    const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-                    videoElement.srcObject = stream;
-                    videoElement.classList.remove('hidden');
-                    videoPlaceholder.classList.add('hidden');
-                    videoBtn.textContent = '視訊已開啟';
-                    videoBtn.disabled = true;
-                    videoBtn.classList.add('bg-gray-400', 'cursor-not-allowed');
-                } catch (error) {
-                    console.error('無法存取攝影機:', error);
-                    alert('無法啟動攝影機。請檢查您的設備權限設定。');
-                }
+        // Get references to input elements
+        const cashIncomeInput = document.getElementById('cashIncome');
+        const debtPercentInput = document.getElementById('debtPercent');
+        const savingsPercentInput = document.getElementById('savingsPercent');
+        const disposablePercentInput = document.getElementById('disposablePercent');
+        const calculateBtn = document.getElementById('calculateBtn');
+
+        // Get references to output elements
+        const totalPercentageSpan = document.getElementById('totalPercentage');
+        const percentageDifferenceSpan = document.getElementById('percentageDifference');
+        const debtAmountSpan = document.getElementById('debtAmount');
+        const savingsAmountSpan = document.getElementById('savingsAmount');
+        const disposableAmountSpan = document.getElementById('disposableAmount');
+        const messageBox = document.getElementById('messageBox');
+        const messageText = document.getElementById('messageText');
+
+        // Function to display messages
+        function showMessage(message, type = 'error') {
+            messageText.textContent = message;
+            messageBox.classList.remove('hidden', 'bg-red-100', 'border-red-400', 'text-red-700', 'bg-green-100', 'border-green-400', 'text-green-700');
+            if (type === 'error') {
+                messageBox.classList.add('bg-red-100', 'border-red-400', 'text-red-700');
+            } else if (type === 'success') {
+                messageBox.classList.add('bg-green-100', 'border-green-400', 'text-green-700');
+            }
+        }
+
+        // Function to hide messages
+        function hideMessage() {
+            messageBox.classList.add('hidden');
+            messageText.textContent = '';
+        }
+
+        // Function to update the total percentage and difference display
+        function updatePercentageSummary() {
+            const debtP = parseFloat(debtPercentInput.value) || 0;
+            const savingsP = parseFloat(savingsPercentInput.value) || 0;
+            const disposableP = parseFloat(disposablePercentInput.value) || 0;
+            const totalP = debtP + savingsP + disposableP;
+            const difference = totalP - 100;
+
+            totalPercentageSpan.textContent = `${totalP}%`;
+
+            if (totalP === 100) {
+                percentageDifferenceSpan.textContent = `0% (完美分配)`;
+                percentageDifferenceSpan.classList.remove('text-red-500', 'text-orange-500');
+                percentageDifferenceSpan.classList.add('text-green-600');
+            } else if (totalP < 100) {
+                percentageDifferenceSpan.textContent = `剩餘 ${Math.abs(difference).toFixed(0)}% (未分配)`;
+                percentageDifferenceSpan.classList.remove('text-green-600', 'text-red-500');
+                percentageDifferenceSpan.classList.add('text-orange-500');
             } else {
-                alert('您的瀏覽器不支援視訊功能。');
+                percentageDifferenceSpan.textContent = `超出 ${Math.abs(difference).toFixed(0)}% (過度分配)`;
+                percentageDifferenceSpan.classList.remove('text-green-600', 'text-orange-500');
+                percentageDifferenceSpan.classList.add('text-red-500');
             }
-        });
-
-        // --- 簽名板功能 ---
-        const canvas = document.getElementById('signature-pad');
-        const clearBtn = document.getElementById('clear-signature-btn');
-        const ctx = canvas.getContext('2d');
-        let isDrawing = false;
-        let lastX = 0;
-        let lastY = 0;
-
-        // 設定畫布的實際寬高，以對應其顯示大小，避免繪圖變形
-        function resizeCanvas() {
-            const ratio = Math.max(window.devicePixelRatio || 1, 1);
-            canvas.width = canvas.offsetWidth * ratio;
-            canvas.height = canvas.offsetHeight * ratio;
-            ctx.scale(ratio, ratio);
-            ctx.strokeStyle = '#000000'; // 筆觸顏色
-            ctx.lineWidth = 2;       // 筆觸寬度
-            ctx.lineCap = 'round';   // 線條結尾樣式
-            ctx.lineJoin = 'round';  // 線條交接樣式
-        }
-        
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
-
-        function getMousePos(canvas, evt) {
-            const rect = canvas.getBoundingClientRect();
-            return {
-                x: evt.clientX - rect.left,
-                y: evt.clientY - rect.top
-            };
         }
 
-        function getTouchPos(canvas, touch) {
-            const rect = canvas.getBoundingClientRect();
-            return {
-                x: touch.clientX - rect.left,
-                y: touch.clientY - rect.top
-            };
-        }
+        // Event listener for input changes to update percentage summary in real-time
+        debtPercentInput.addEventListener('input', updatePercentageSummary);
+        savingsPercentInput.addEventListener('input', updatePercentageSummary);
+        disposablePercentInput.addEventListener('input', updatePercentageSummary);
 
-        function startDrawing(e) {
-            isDrawing = true;
-            let pos;
-            if (e.touches) {
-                pos = getTouchPos(canvas, e.touches[0]);
-            } else {
-                pos = getMousePos(canvas, e);
-            }
-            [lastX, lastY] = [pos.x, pos.y];
-        }
+        // Initial update of percentage summary on load
+        updatePercentageSummary();
 
-        function draw(e) {
-            if (!isDrawing) return;
-            e.preventDefault(); // 防止頁面滾動
 
-            let pos;
-             if (e.touches) {
-                pos = getTouchPos(canvas, e.touches[0]);
-            } else {
-                pos = getMousePos(canvas, e);
-            }
+        // Event listener for the calculate button
+        calculateBtn.addEventListener('click', () => {
+            hideMessage(); // Hide any previous messages
 
-            ctx.beginPath();
-            ctx.moveTo(lastX, lastY);
-            ctx.lineTo(pos.x, pos.y);
-            ctx.stroke();
-            [lastX, lastY] = [pos.x, pos.y];
-        }
+            const cashIncome = parseFloat(cashIncomeInput.value);
+            const debtPercent = parseFloat(debtPercentInput.value);
+            const savingsPercent = parseFloat(savingsPercentInput.value);
+            const disposablePercent = parseFloat(disposablePercentInput.value);
 
-        function stopDrawing() {
-            isDrawing = false;
-        }
-        
-        // 桌面裝置事件
-        canvas.addEventListener('mousedown', startDrawing);
-        canvas.addEventListener('mousemove', draw);
-        canvas.addEventListener('mouseup', stopDrawing);
-        canvas.addEventListener('mouseout', stopDrawing);
-
-        // 行動裝置事件
-        canvas.addEventListener('touchstart', startDrawing);
-        canvas.addEventListener('touchmove', draw);
-        canvas.addEventListener('touchend', stopDrawing);
-
-        // 清除簽名
-        clearBtn.addEventListener('click', () => {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-        });
-        
-        // --- 提交表單 ---
-        const submitBtn = document.getElementById('submit-btn');
-        const successMessage = document.getElementById('success-message');
-
-        submitBtn.addEventListener('click', () => {
-            const name = document.getElementById('name').value;
-            const phone = document.getElementById('phone').value;
-            const amount = document.getElementById('loan-amount').value;
-
-            if (!name || !phone || !amount) {
-                alert('請填寫所有基本資料欄位。');
-                return;
-            }
-            
-            // 檢查是否已開啟視訊
-            if (videoElement.classList.contains('hidden')) {
-                alert('請先完成視訊對保步驟。');
+            // Input validation
+            if (isNaN(cashIncome) || cashIncome < 0) {
+                showMessage('請輸入有效的現金收入金額。');
                 return;
             }
 
-            // 檢查簽名是否為空
-            const signatureData = canvas.toDataURL();
-            const blankCanvas = document.createElement('canvas');
-            blankCanvas.width = canvas.width;
-            blankCanvas.height = canvas.height;
-            if (signatureData === blankCanvas.toDataURL()) {
-                alert('請在文件上簽名。');
+            if (isNaN(debtPercent) || debtPercent < 0 || isNaN(savingsPercent) || savingsPercent < 0 || isNaN(disposablePercent) || disposablePercent < 0) {
+                showMessage('請輸入有效的百分比 (0-100)。');
                 return;
             }
 
-            // 在此處，您可以將資料傳送到後端伺服器
-            // 包含表單資料和簽名圖片的 Base64 字串
-            const formData = {
-                name: name,
-                phone: phone,
-                loanAmount: amount,
-                signatureImage: signatureData // 這是 Data URL 格式的圖片
-            };
+            // Calculate total percentage
+            const totalPercentage = debtPercent + savingsPercent + disposablePercent;
 
-            console.log('準備提交的資料:', formData);
-            
-            // 顯示成功訊息 (這裡僅為示範，實際應用需等待伺服器回應)
-            document.getElementById('loan-form').reset();
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            // 理想情況下，也應該停止視訊串流
-            const stream = videoElement.srcObject;
-            if(stream) {
-                const tracks = stream.getTracks();
-                tracks.forEach(track => track.stop());
-                videoElement.srcObject = null;
-                videoElement.classList.add('hidden');
-                videoPlaceholder.classList.remove('hidden');
-                videoBtn.textContent = '開啟視訊鏡頭';
-                videoBtn.disabled = false;
-                videoBtn.classList.remove('bg-gray-400', 'cursor-not-allowed');
+            // Check if percentages sum to 100
+            if (totalPercentage === 0) {
+                showMessage('總百分比不能為零。請調整分配。');
+                return;
             }
 
 
-            successMessage.classList.remove('hidden');
-            submitBtn.classList.add('hidden');
-            setTimeout(() => {
-                 successMessage.classList.add('hidden');
-                 submitBtn.classList.remove('hidden');
-            }, 5000); // 5秒後隱藏成功訊息
+            // Calculate amounts
+            const debtAmount = (cashIncome * debtPercent) / 100;
+            const savingsAmount = (cashIncome * savingsPercent) / 100;
+            const disposableAmount = (cashIncome * disposablePercent) / 100;
+
+            // Update display
+            debtAmountSpan.textContent = `${debtAmount.toFixed(2)} TWD`;
+            savingsAmountSpan.textContent = `${savingsAmount.toFixed(2)} TWD`;
+            disposableAmountSpan.textContent = `${disposableAmount.toFixed(2)} TWD`;
+
+            // Update percentage summary again after calculation (redundant but ensures consistency)
+            updatePercentageSummary();
+
+            if (totalPercentage !== 100) {
+                showMessage(`注意：您的百分比總和為 ${totalPercentage}%，與 100% 不符。金額將按您輸入的百分比分配。`, 'warning');
+            } else {
+                // If it sums to 100, we can optionally show a success message or just hide messages.
+                hideMessage();
+            }
         });
-    });
     </script>
 </body>
 </html>
