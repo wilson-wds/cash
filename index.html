@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>現金收入分配器</title>
-    <!-- Tailwind CSS CDN -->
+    <title>現金收入分配器 (進階版)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* Custom font for Inter, if not already handled by Tailwind defaults or system */
@@ -16,16 +15,17 @@
             background-color: #f3f4f6; /* Light gray background */
         }
         .container {
-            max-width: 90%; /* Responsive width */
+            max-width: 95%; /* Responsive width */
             margin: auto;
             padding: 1rem; /* Padding for mobile */
         }
-        @media (min-width: 640px) { /* Small screens and up */
+        @media (min-width: 768px) { /* Medium screens and up */
             .container {
-                max-width: 600px; /* Max width for desktop */
+                max-width: 700px; /* Max width for desktop */
                 padding: 2rem; /* More padding on larger screens */
             }
         }
+        /* Hide number input spinners */
         input[type="number"]::-webkit-outer-spin-button,
         input[type="number"]::-webkit-inner-spin-button {
             -webkit-appearance: none;
@@ -36,52 +36,50 @@
         }
     </style>
 </head>
-<body class="flex items-center justify-center min-h-screen">
+<body class="flex items-center justify-center min-h-screen py-8">
     <div class="container bg-white p-6 md:p-8 rounded-lg shadow-xl border border-gray-200">
         <h1 class="text-3xl md:text-4xl font-bold text-center mb-6 text-gray-800">現金收入分配器</h1>
 
-        <div class="space-y-4">
-            <!-- Cash Income Input -->
+        <div class="space-y-6">
             <div>
                 <label for="cashIncome" class="block text-lg font-medium text-gray-700 mb-2">現金收入 (TWD)</label>
                 <input type="number" id="cashIncome" placeholder="輸入您的總收入"
                        class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 text-lg">
             </div>
 
-            <!-- Percentage Inputs -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div>
-                    <label for="debtPercent" class="block text-base font-medium text-gray-700 mb-2">還債 (%)</label>
-                    <input type="number" id="debtPercent" value="40" min="0" max="100"
-                           class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 text-lg">
-                </div>
-                <div>
-                    <label for="savingsPercent" class="block text-base font-medium text-gray-700 mb-2">儲蓄 (%)</label>
-                    <input type="number" id="savingsPercent" value="30" min="0" max="100"
-                           class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 text-lg">
-                </div>
-                <div>
-                    <label for="disposablePercent" class="block text-base font-medium text-gray-700 mb-2">可用 (%)</label>
-                    <input type="number" id="disposablePercent" value="30" min="0" max="100"
-                           class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 text-lg">
-                </div>
-                <!-- New Input Field: Other Expenses -->
-                <div>
-                    <label for="otherExpensesPercent" class="block text-base font-medium text-gray-700 mb-2">其他費用 (%)</label>
-                    <input type="number" id="otherExpensesPercent" value="0" min="0" max="100"
-                           class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 text-lg">
+            <div class="space-y-4">
+                <h2 class="text-xl font-semibold text-gray-700 border-b pb-2">固定分配 (%)</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label for="debtPercent" class="block text-base font-medium text-gray-700 mb-2">還債</label>
+                        <input type="number" id="debtPercent" value="40" min="0" max="100"
+                               class="percentage-input mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 text-lg">
+                    </div>
+                    <div>
+                        <label for="savingsPercent" class="block text-base font-medium text-gray-700 mb-2">儲蓄</label>
+                        <input type="number" id="savingsPercent" value="30" min="0" max="100"
+                               class="percentage-input mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 text-lg">
+                    </div>
+                    <div>
+                        <label for="disposablePercent" class="block text-base font-medium text-gray-700 mb-2">可用</label>
+                        <input type="number" id="disposablePercent" value="30" min="0" max="100"
+                               class="percentage-input mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 text-lg">
+                    </div>
                 </div>
             </div>
 
-            <!-- Calculate Button -->
+            <div class="space-y-4" id="custom-fields-container">
+                 <h2 class="text-xl font-semibold text-gray-700 border-b pb-2">自訂分配 (%)</h2>
+                 </div>
+
+
             <button id="calculateBtn"
                     class="w-full mt-6 py-3 px-6 border border-transparent rounded-md shadow-sm text-lg font-semibold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out">
                 計算分配
             </button>
         </div>
 
-        <!-- Results Display -->
-        <div class="mt-8 pt-6 border-t border-gray-200 space-y-4">
+        <div id="results-container" class="mt-8 pt-6 border-t border-gray-200 space-y-4 hidden">
             <h2 class="text-2xl font-bold text-gray-800 text-center mb-4">分配結果</h2>
 
             <div class="bg-gray-50 p-4 rounded-md shadow-sm">
@@ -108,14 +106,10 @@
                     可用金額: <span id="disposableAmount" class="text-yellow-700 text-xl font-bold">0 TWD</span>
                 </p>
             </div>
-            <!-- New Output Field: Other Expenses Amount -->
-            <div class="bg-blue-50 p-4 rounded-md shadow-sm">
-                <p class="text-lg font-medium text-gray-700 flex justify-between items-center">
-                    其他費用金額: <span id="otherExpensesAmount" class="text-blue-700 text-xl font-bold">0 TWD</span>
-                </p>
-            </div>
+            
+            <div id="custom-results-container" class="space-y-4">
+                 </div>
 
-            <!-- Error/Message Box -->
             <div id="messageBox" class="hidden mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-md" role="alert">
                 <p id="messageText" class="text-sm"></p>
             </div>
@@ -123,134 +117,184 @@
     </div>
 
     <script>
-        // Get references to input elements
-        const cashIncomeInput = document.getElementById('cashIncome');
-        const debtPercentInput = document.getElementById('debtPercent');
-        const savingsPercentInput = document.getElementById('savingsPercent');
-        const disposablePercentInput = document.getElementById('disposablePercent');
-        const otherExpensesPercentInput = document.getElementById('otherExpensesPercent'); // New: Other Expenses input
-        const calculateBtn = document.getElementById('calculateBtn');
+        document.addEventListener('DOMContentLoaded', function () {
+            // --- DOM Element References ---
+            const cashIncomeInput = document.getElementById('cashIncome');
+            const calculateBtn = document.getElementById('calculateBtn');
+            const customFieldsContainer = document.getElementById('custom-fields-container');
+            const customResultsContainer = document.getElementById('custom-results-container');
+            const resultsContainer = document.getElementById('results-container');
+            
+            // Output elements
+            const totalPercentageSpan = document.getElementById('totalPercentage');
+            const percentageDifferenceSpan = document.getElementById('percentageDifference');
+            const debtAmountSpan = document.getElementById('debtAmount');
+            const savingsAmountSpan = document.getElementById('savingsAmount');
+            const disposableAmountSpan = document.getElementById('disposableAmount');
+            const messageBox = document.getElementById('messageBox');
+            const messageText = document.getElementById('messageText');
 
-        // Get references to output elements
-        const totalPercentageSpan = document.getElementById('totalPercentage');
-        const percentageDifferenceSpan = document.getElementById('percentageDifference');
-        const debtAmountSpan = document.getElementById('debtAmount');
-        const savingsAmountSpan = document.getElementById('savingsAmount');
-        const disposableAmountSpan = document.getElementById('disposableAmount');
-        const otherExpensesAmountSpan = document.getElementById('otherExpensesAmount'); // New: Other Expenses amount span
-        const messageBox = document.getElementById('messageBox');
-        const messageText = document.getElementById('messageText');
+            const fixedPercentageInputs = document.querySelectorAll('#debtPercent, #savingsPercent, #disposablePercent');
+            
+            // --- Dynamic Field Creation ---
+            const NUM_CUSTOM_FIELDS = 5;
+            for (let i = 1; i <= NUM_CUSTOM_FIELDS; i++) {
+                // Create input fields
+                const fieldWrapper = document.createElement('div');
+                fieldWrapper.className = 'grid grid-cols-3 gap-4 items-end';
+                
+                // Name Input
+                const nameDiv = document.createElement('div');
+                nameDiv.className = 'col-span-2';
+                nameDiv.innerHTML = `
+                    <label for="customName${i}" class="block text-sm font-medium text-gray-600 mb-1">項目 ${i} 名稱</label>
+                    <input type="text" id="customName${i}" placeholder="例如：投資、娛樂..." class="custom-name-input mt-1 block w-full px-3 py-3 border border-gray-300 rounded-md shadow-sm text-gray-900 text-base">
+                `;
+                
+                // Percentage Input
+                const percentDiv = document.createElement('div');
+                percentDiv.className = 'col-span-1';
+                percentDiv.innerHTML = `
+                     <label for="customPercent${i}" class="block text-sm font-medium text-gray-600 mb-1">%</label>
+                    <input type="number" id="customPercent${i}" value="0" min="0" max="100" class="percentage-input mt-1 block w-full px-3 py-3 border border-gray-300 rounded-md shadow-sm text-gray-900 text-lg">
+                `;
+                
+                fieldWrapper.appendChild(nameDiv);
+                fieldWrapper.appendChild(percentDiv);
+                customFieldsContainer.appendChild(fieldWrapper);
 
-        // Function to display messages
-        function showMessage(message, type = 'error') {
-            messageText.textContent = message;
-            messageBox.classList.remove('hidden', 'bg-red-100', 'border-red-400', 'text-red-700', 'bg-green-100', 'border-green-400', 'text-green-700');
-            if (type === 'error') {
-                messageBox.classList.add('bg-red-100', 'border-red-400', 'text-red-700');
-            } else if (type === 'success') {
-                messageBox.classList.add('bg-green-100', 'border-green-400', 'text-green-700');
-            } else if (type === 'warning') { // New: Warning type for messages
-                messageBox.classList.add('bg-yellow-100', 'border-yellow-400', 'text-yellow-700');
-            }
-            messageBox.classList.remove('hidden'); // Ensure message box is visible
-        }
-
-
-        // Function to hide messages
-        function hideMessage() {
-            messageBox.classList.add('hidden');
-            messageText.textContent = '';
-        }
-
-        // Function to update the total percentage and difference display
-        function updatePercentageSummary() {
-            const debtP = parseFloat(debtPercentInput.value) || 0;
-            const savingsP = parseFloat(savingsPercentInput.value) || 0;
-            const disposableP = parseFloat(disposablePercentInput.value) || 0;
-            const otherExpensesP = parseFloat(otherExpensesPercentInput.value) || 0; // New: Get other expenses percentage
-            const totalP = debtP + savingsP + disposableP + otherExpensesP; // New: Add other expenses to total
-            const difference = totalP - 100;
-
-            totalPercentageSpan.textContent = `${totalP.toFixed(0)}%`; // Format to whole number for display
-
-            if (totalP === 100) {
-                percentageDifferenceSpan.textContent = `0% (完美分配)`;
-                percentageDifferenceSpan.classList.remove('text-red-500', 'text-orange-500');
-                percentageDifferenceSpan.classList.add('text-green-600');
-            } else if (totalP < 100) {
-                percentageDifferenceSpan.textContent = `剩餘 ${Math.abs(difference).toFixed(0)}% (未分配)`;
-                percentageDifferenceSpan.classList.remove('text-green-600', 'text-red-500');
-                percentageDifferenceSpan.classList.add('text-orange-500');
-            } else {
-                percentageDifferenceSpan.textContent = `超出 ${Math.abs(difference).toFixed(0)}% (過度分配)`;
-                percentageDifferenceSpan.classList.remove('text-green-600', 'text-orange-500');
-                percentageDifferenceSpan.classList.add('text-red-500');
-            }
-        }
-
-        // Event listener for input changes to update percentage summary in real-time
-        debtPercentInput.addEventListener('input', updatePercentageSummary);
-        savingsPercentInput.addEventListener('input', updatePercentageSummary);
-        disposablePercentInput.addEventListener('input', updatePercentageSummary);
-        otherExpensesPercentInput.addEventListener('input', updatePercentageSummary); // New: Listen for other expenses input
-
-        // Initial update of percentage summary on load
-        updatePercentageSummary();
-
-
-        // Event listener for the calculate button
-        calculateBtn.addEventListener('click', () => {
-            hideMessage(); // Hide any previous messages
-
-            const cashIncome = parseFloat(cashIncomeInput.value);
-            const debtPercent = parseFloat(debtPercentInput.value);
-            const savingsPercent = parseFloat(savingsPercentInput.value);
-            const disposablePercent = parseFloat(disposablePercentInput.value);
-            const otherExpensesPercent = parseFloat(otherExpensesPercentInput.value); // New: Get other expenses percentage
-
-            // Input validation
-            if (isNaN(cashIncome) || cashIncome < 0) {
-                showMessage('請輸入有效的現金收入金額。');
-                return;
+                // Create result display holders
+                const resultWrapper = document.createElement('div');
+                resultWrapper.id = `customResultWrapper${i}`;
+                resultWrapper.className = 'bg-gray-100 p-4 rounded-md shadow-sm hidden';
+                resultWrapper.innerHTML = `
+                    <p class="text-lg font-medium text-gray-700 flex justify-between items-center">
+                        <span id="customResultLabel${i}">項目 ${i}</span>: 
+                        <span id="customResultAmount${i}" class="text-gray-800 text-xl font-bold">0 TWD</span>
+                    </p>
+                `;
+                customResultsContainer.appendChild(resultWrapper);
             }
 
-            if (isNaN(debtPercent) || debtPercent < 0 || isNaN(savingsPercent) || savingsPercent < 0 || isNaN(disposablePercent) || disposablePercent < 0 || isNaN(otherExpensesPercent) || otherExpensesPercent < 0) {
-                showMessage('請輸入有效的百分比 (0-100)。');
-                return;
+            const allPercentageInputs = document.querySelectorAll('.percentage-input');
+
+            // --- Functions ---
+            function showMessage(message, type = 'error') {
+                messageText.textContent = message;
+                const classMap = {
+                    error: ['bg-red-100', 'border-red-400', 'text-red-700'],
+                    success: ['bg-green-100', 'border-green-400', 'text-green-700'],
+                    warning: ['bg-yellow-100', 'border-yellow-400', 'text-yellow-700']
+                };
+                messageBox.classList.remove('hidden', ...Object.values(classMap).flat());
+                messageBox.classList.add(...(classMap[type] || classMap['error']));
             }
 
-            // Calculate total percentage
-            const totalPercentage = debtPercent + savingsPercent + disposablePercent + otherExpensesPercent; // New: Add other expenses to total
-
-            // Check if percentages sum to 0 or negative
-            if (totalPercentage <= 0) {
-                showMessage('總百分比不能為零或負數。請調整分配。');
-                return;
+            function hideMessage() {
+                messageBox.classList.add('hidden');
+                messageText.textContent = '';
             }
 
+            function updatePercentageSummary() {
+                let totalP = 0;
+                allPercentageInputs.forEach(input => {
+                    totalP += parseFloat(input.value) || 0;
+                });
+                
+                const difference = totalP - 100;
+                totalPercentageSpan.textContent = `${totalP.toFixed(0)}%`;
 
-            // Calculate amounts
-            const debtAmount = (cashIncome * debtPercent) / 100;
-            const savingsAmount = (cashIncome * savingsPercent) / 100;
-            const disposableAmount = (cashIncome * disposablePercent) / 100;
-            const otherExpensesAmount = (cashIncome * otherExpensesPercent) / 100; // New: Calculate other expenses amount
+                if (totalP === 100) {
+                    percentageDifferenceSpan.textContent = `0% (完美分配)`;
+                    percentageDifferenceSpan.className = 'text-base font-medium text-green-600';
+                } else if (totalP < 100) {
+                    percentageDifferenceSpan.textContent = `剩餘 ${Math.abs(difference).toFixed(0)}% (未分配)`;
+                    percentageDifferenceSpan.className = 'text-base font-medium text-orange-500';
+                } else {
+                    percentageDifferenceSpan.textContent = `超出 ${Math.abs(difference).toFixed(0)}% (過度分配)`;
+                    percentageDifferenceSpan.className = 'text-base font-medium text-red-500';
+                }
+            }
 
-            // Update display
-            debtAmountSpan.textContent = `${debtAmount.toFixed(2)} TWD`;
-            savingsAmountSpan.textContent = `${savingsAmount.toFixed(2)} TWD`;
-            disposableAmountSpan.textContent = `${disposableAmount.toFixed(2)} TWD`;
-            otherExpensesAmountSpan.textContent = `${otherExpensesAmount.toFixed(2)} TWD`; // New: Display other expenses amount
+            // --- Event Listeners ---
+            allPercentageInputs.forEach(input => {
+                input.addEventListener('input', updatePercentageSummary);
+            });
 
-
-            // Update percentage summary again after calculation (redundant but ensures consistency)
-            updatePercentageSummary();
-
-            if (totalPercentage !== 100) {
-                showMessage(`注意：您的百分比總和為 ${totalPercentage.toFixed(0)}%，與 100% 不符。金額將按您輸入的百分比分配。`, 'warning');
-            } else {
-                // If it sums to 100, we can optionally show a success message or just hide messages.
+            calculateBtn.addEventListener('click', () => {
                 hideMessage();
-            }
+                const cashIncome = parseFloat(cashIncomeInput.value);
+
+                if (isNaN(cashIncome) || cashIncome < 0) {
+                    showMessage('請輸入有效的現金收入金額。');
+                    resultsContainer.classList.add('hidden');
+                    return;
+                }
+                
+                let totalPercentage = 0;
+                let hasInvalidPercent = false;
+                allPercentageInputs.forEach(input => {
+                    const percent = parseFloat(input.value);
+                    if (isNaN(percent) || percent < 0) {
+                        hasInvalidPercent = true;
+                    }
+                    totalPercentage += percent || 0;
+                });
+
+                if(hasInvalidPercent) {
+                    showMessage('請輸入有效的百分比 (0 或以上)。');
+                    resultsContainer.classList.add('hidden');
+                    return;
+                }
+
+                if (totalPercentage <= 0 && cashIncome > 0) {
+                    showMessage('總百分比為零，無法進行分配。');
+                    resultsContainer.classList.add('hidden');
+                    return;
+                }
+
+                resultsContainer.classList.remove('hidden');
+
+                // --- Calculations & Display Update ---
+                const calculateAndDisplay = (percentInput, amountSpan) => {
+                    const percent = parseFloat(percentInput.value) || 0;
+                    const amount = (cashIncome * percent) / 100;
+                    amountSpan.textContent = `${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} TWD`;
+                };
+
+                // Fixed fields
+                calculateAndDisplay(document.getElementById('debtPercent'), debtAmountSpan);
+                calculateAndDisplay(document.getElementById('savingsPercent'), savingsAmountSpan);
+                calculateAndDisplay(document.getElementById('disposablePercent'), disposableAmountSpan);
+
+                // Custom fields
+                for (let i = 1; i <= NUM_CUSTOM_FIELDS; i++) {
+                    const nameInput = document.getElementById(`customName${i}`);
+                    const percentInput = document.getElementById(`customPercent${i}`);
+                    const percent = parseFloat(percentInput.value) || 0;
+                    const name = nameInput.value.trim() || `項目 ${i}`;
+                    
+                    const wrapper = document.getElementById(`customResultWrapper${i}`);
+                    const labelSpan = document.getElementById(`customResultLabel${i}`);
+                    const amountSpan = document.getElementById(`customResultAmount${i}`);
+                    
+                    if (percent > 0) {
+                        labelSpan.textContent = `${name}`;
+                        calculateAndDisplay(percentInput, amountSpan);
+                        wrapper.classList.remove('hidden');
+                    } else {
+                        wrapper.classList.add('hidden'); // Hide if percentage is 0
+                    }
+                }
+                
+                updatePercentageSummary(); // Update summary colors and text
+                if (totalPercentage !== 100) {
+                    showMessage(`注意：您的百分比總和為 ${totalPercentage.toFixed(0)}%，與 100% 不符。金額將按您輸入的百分比分配。`, 'warning');
+                }
+            });
+
+            // --- Initial State ---
+            updatePercentageSummary(); // Initial call to set summary text
         });
     </script>
 </body>
