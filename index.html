@@ -3,29 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>現金收入分配器 (進階版)</title>
+    <title>現金收入與還款計算機</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        /* Custom font for Inter, if not already handled by Tailwind defaults or system */
         html {
             font-family: 'Inter', sans-serif;
         }
-        /* Basic styling adjustments for better aesthetics */
         body {
-            background-color: #f3f4f6; /* Light gray background */
+            background-color: #f3f4f6;
         }
         .container {
-            max-width: 95%; /* Responsive width */
+            max-width: 95%;
             margin: auto;
-            padding: 1rem; /* Padding for mobile */
+            padding: 1rem;
         }
-        @media (min-width: 768px) { /* Medium screens and up */
+        @media (min-width: 768px) {
             .container {
-                max-width: 700px; /* Max width for desktop */
-                padding: 2rem; /* More padding on larger screens */
+                max-width: 700px;
+                padding: 2rem;
             }
         }
-        /* Hide number input spinners */
         input[type="number"]::-webkit-outer-spin-button,
         input[type="number"]::-webkit-inner-spin-button {
             -webkit-appearance: none;
@@ -34,98 +34,147 @@
         input[type="number"] {
             -moz-appearance: textfield;
         }
+        /* Styles for active and inactive tabs */
+        .tab-btn {
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .tab-btn.active {
+            background-color: #4f46e5; /* indigo-600 */
+            color: white;
+            border-color: #4f46e5;
+        }
+        .tab-btn:not(.active) {
+            background-color: white;
+            color: #4b5563; /* gray-600 */
+            border-color: #d1d5db; /* gray-300 */
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        /* Style for the repayment schedule table */
+        .schedule-table-wrapper {
+            max-height: 400px;
+            overflow-y: auto;
+        }
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen py-8">
     <div class="container bg-white p-6 md:p-8 rounded-lg shadow-xl border border-gray-200">
-        <h1 class="text-3xl md:text-4xl font-bold text-center mb-6 text-gray-800">現金收入分配器</h1>
-
-        <div class="space-y-6">
-            <div>
-                <label for="cashIncome" class="block text-lg font-medium text-gray-700 mb-2">現金收入 (TWD)</label>
-                <input type="number" id="cashIncome" placeholder="輸入您的總收入"
-                       class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 text-lg">
-            </div>
-
-            <div class="space-y-4">
-                <h2 class="text-xl font-semibold text-gray-700 border-b pb-2">固定分配 (%)</h2>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                        <label for="debtPercent" class="block text-base font-medium text-gray-700 mb-2">還債</label>
-                        <input type="number" id="debtPercent" value="40" min="0" max="100"
-                               class="percentage-input mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 text-lg">
-                    </div>
-                    <div>
-                        <label for="savingsPercent" class="block text-base font-medium text-gray-700 mb-2">儲蓄</label>
-                        <input type="number" id="savingsPercent" value="30" min="0" max="100"
-                               class="percentage-input mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 text-lg">
-                    </div>
-                    <div>
-                        <label for="disposablePercent" class="block text-base font-medium text-gray-700 mb-2">可用</label>
-                        <input type="number" id="disposablePercent" value="30" min="0" max="100"
-                               class="percentage-input mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 text-lg">
-                    </div>
-                </div>
-            </div>
-
-            <div class="space-y-4" id="custom-fields-container">
-                 <h2 class="text-xl font-semibold text-gray-700 border-b pb-2">自訂分配 (%)</h2>
-                 </div>
-
-
-            <button id="calculateBtn"
-                    class="w-full mt-6 py-3 px-6 border border-transparent rounded-md shadow-sm text-lg font-semibold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out">
-                計算分配
-            </button>
+        <!-- Tab Navigation -->
+        <div class="mb-6 border-b border-gray-200">
+            <nav class="flex -mb-px space-x-2" aria-label="Tabs">
+                <button id="allocator-tab" class="tab-btn active text-lg font-semibold py-3 px-6 rounded-t-md border">
+                    現金收入分配器
+                </button>
+                <button id="loan-tab" class="tab-btn text-lg font-semibold py-3 px-6 rounded-t-md border">
+                    還款計算機
+                </button>
+            </nav>
         </div>
 
-        <div id="results-container" class="mt-8 pt-6 border-t border-gray-200 space-y-4 hidden">
-            <h2 class="text-2xl font-bold text-gray-800 text-center mb-4">分配結果</h2>
+        <!-- Tab Content: Allocator -->
+        <div id="allocator-content" class="tab-content active">
+            <h1 class="text-3xl md:text-4xl font-bold text-center mb-6 text-gray-800">現金收入分配器</h1>
+            <div class="space-y-6">
+                <div>
+                    <label for="cashIncome" class="block text-lg font-medium text-gray-700 mb-2">現金收入 (TWD)</label>
+                    <input type="number" id="cashIncome" placeholder="輸入您的總收入" class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 text-lg">
+                </div>
+                <div class="space-y-4">
+                    <h2 class="text-xl font-semibold text-gray-700 border-b pb-2">固定分配 (%)</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label for="debtPercent" class="block text-base font-medium text-gray-700 mb-2">還債</label>
+                            <input type="number" id="debtPercent" value="40" min="0" max="100" class="percentage-input mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 text-lg">
+                        </div>
+                        <div>
+                            <label for="savingsPercent" class="block text-base font-medium text-gray-700 mb-2">儲蓄</label>
+                            <input type="number" id="savingsPercent" value="30" min="0" max="100" class="percentage-input mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 text-lg">
+                        </div>
+                        <div>
+                            <label for="disposablePercent" class="block text-base font-medium text-gray-700 mb-2">可用</label>
+                            <input type="number" id="disposablePercent" value="30" min="0" max="100" class="percentage-input mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 text-lg">
+                        </div>
+                    </div>
+                </div>
+                <button id="calculateBtn" class="w-full mt-6 py-3 px-6 border border-transparent rounded-md shadow-sm text-lg font-semibold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out">計算分配</button>
+            </div>
+            <div id="results-container" class="mt-8 pt-6 border-t border-gray-200 space-y-4 hidden">
+                <h2 class="text-2xl font-bold text-gray-800 text-center mb-4">分配結果</h2>
+                <div class="bg-gray-50 p-4 rounded-md shadow-sm">
+                    <p class="text-base text-gray-600 font-medium flex justify-between items-center">總百分比: <span id="totalPercentage" class="text-indigo-600 text-lg font-semibold">100%</span></p>
+                    <p class="text-sm text-gray-500 flex justify-between items-center mt-1">差異: <span id="percentageDifference" class="text-red-500 text-base font-medium">0% (完美分配)</span></p>
+                </div>
+                <div class="bg-indigo-50 p-4 rounded-md shadow-sm"><p class="text-lg font-medium text-gray-700 flex justify-between items-center">還債金額: <span id="debtAmount" class="text-indigo-700 text-xl font-bold">0 TWD</span></p></div>
+                <div class="bg-green-50 p-4 rounded-md shadow-sm"><p class="text-lg font-medium text-gray-700 flex justify-between items-center">儲蓄金額: <span id="savingsAmount" class="text-green-700 text-xl font-bold">0 TWD</span></p></div>
+                <div class="bg-yellow-50 p-4 rounded-md shadow-sm"><p class="text-lg font-medium text-gray-700 flex justify-between items-center">可用金額: <span id="disposableAmount" class="text-yellow-700 text-xl font-bold">0 TWD</span></p></div>
+                <div id="messageBox" class="hidden mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-md" role="alert"><p id="messageText" class="text-sm"></p></div>
+            </div>
+        </div>
 
-            <div class="bg-gray-50 p-4 rounded-md shadow-sm">
-                <p class="text-base text-gray-600 font-medium flex justify-between items-center">
-                    總百分比: <span id="totalPercentage" class="text-indigo-600 text-lg font-semibold">100%</span>
-                </p>
-                <p class="text-sm text-gray-500 flex justify-between items-center mt-1">
-                    差異: <span id="percentageDifference" class="text-red-500 text-base font-medium">0% (完美分配)</span>
-                </p>
+        <!-- Tab Content: Loan Calculator -->
+        <div id="loan-calculator-content" class="tab-content">
+            <h1 class="text-3xl md:text-4xl font-bold text-center mb-6 text-gray-800">還款計算機</h1>
+            <div class="space-y-6">
+                <div>
+                    <label for="loanPrincipal" class="block text-lg font-medium text-gray-700 mb-2">貸款本金 (TWD)</label>
+                    <input type="number" id="loanPrincipal" placeholder="輸入貸款總金額" class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 text-lg">
+                </div>
+                <div>
+                    <label for="loanInterestRate" class="block text-lg font-medium text-gray-700 mb-2">月利率 (%)</label>
+                    <input type="number" id="loanInterestRate" placeholder="例如：0.5" class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 text-lg">
+                </div>
+                <div>
+                    <label for="loanTerm" class="block text-lg font-medium text-gray-700 mb-2">還款期數 (月)</label>
+                    <input type="number" id="loanTerm" placeholder="輸入總月數" class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 text-lg">
+                </div>
+                <div class="flex items-center">
+                    <input id="rebateCheckbox" type="checkbox" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                    <label for="rebateCheckbox" class="ml-2 block text-sm text-gray-900">是否退傭 (30%)</label>
+                </div>
+                <button id="calculateLoanBtn" class="w-full mt-6 py-3 px-6 border border-transparent rounded-md shadow-sm text-lg font-semibold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out">計算還款計畫</button>
             </div>
-
-            <div class="bg-indigo-50 p-4 rounded-md shadow-sm">
-                <p class="text-lg font-medium text-gray-700 flex justify-between items-center">
-                    還債金額: <span id="debtAmount" class="text-indigo-700 text-xl font-bold">0 TWD</span>
-                </p>
-            </div>
-            <div class="bg-green-50 p-4 rounded-md shadow-sm">
-                <p class="text-lg font-medium text-gray-700 flex justify-between items-center">
-                    儲蓄金額: <span id="savingsAmount" class="text-green-700 text-xl font-bold">0 TWD</span>
-                </p>
-            </div>
-            <div class="bg-yellow-50 p-4 rounded-md shadow-sm">
-                <p class="text-lg font-medium text-gray-700 flex justify-between items-center">
-                    可用金額: <span id="disposableAmount" class="text-yellow-700 text-xl font-bold">0 TWD</span>
-                </p>
-            </div>
-            
-            <div id="custom-results-container" class="space-y-4">
-                 </div>
-
-            <div id="messageBox" class="hidden mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-md" role="alert">
-                <p id="messageText" class="text-sm"></p>
+            <div id="loan-results-container" class="mt-8 pt-6 border-t border-gray-200 space-y-4 hidden">
+                <h2 class="text-2xl font-bold text-gray-800 text-center mb-4">還款計畫結果</h2>
+                <div class="bg-blue-50 p-4 rounded-md shadow-sm"><p class="text-lg font-medium text-gray-700 flex justify-between items-center">每期還款金額: <span id="monthlyPaymentResult" class="text-blue-700 text-xl font-bold">0 TWD</span></p></div>
+                <div class="bg-gray-100 p-4 rounded-md shadow-sm"><p class="text-lg font-medium text-gray-700 flex justify-between items-center">本金還款總額: <span id="totalPrincipalPaid" class="text-gray-800 text-xl font-bold">0 TWD</span></p></div>
+                <div class="bg-red-50 p-4 rounded-md shadow-sm"><p class="text-lg font-medium text-gray-700 flex justify-between items-center">利息還款總額: <span id="totalInterestPaid" class="text-red-700 text-xl font-bold">0 TWD</span></p></div>
+                <div id="loanMessageBox" class="hidden mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-md" role="alert"><p id="loanMessageText" class="text-sm"></p></div>
+                
+                <!-- Repayment Schedule Table -->
+                <div id="repayment-schedule-container" class="mt-6 hidden">
+                    <h3 class="text-xl font-semibold text-gray-700 mb-3 text-center">每期還款明細</h3>
+                    <div class="schedule-table-wrapper border border-gray-200 rounded-lg">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead id="repayment-schedule-head" class="bg-gray-50 sticky top-0">
+                                <!-- Header will be inserted here by JavaScript -->
+                            </thead>
+                            <tbody id="repayment-schedule-body" class="bg-white divide-y divide-gray-200">
+                                <!-- Rows will be inserted here by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            // --- DOM Element References ---
+            // --- General & Tab Elements ---
+            const allocatorTab = document.getElementById('allocator-tab');
+            const loanTab = document.getElementById('loan-tab');
+            const allocatorContent = document.getElementById('allocator-content');
+            const loanCalculatorContent = document.getElementById('loan-calculator-content');
+
+            // --- Allocator Elements ---
             const cashIncomeInput = document.getElementById('cashIncome');
             const calculateBtn = document.getElementById('calculateBtn');
-            const customFieldsContainer = document.getElementById('custom-fields-container');
-            const customResultsContainer = document.getElementById('custom-results-container');
             const resultsContainer = document.getElementById('results-container');
-            
-            // Output elements
+            const allPercentageInputs = document.querySelectorAll('.percentage-input');
             const totalPercentageSpan = document.getElementById('totalPercentage');
             const percentageDifferenceSpan = document.getElementById('percentageDifference');
             const debtAmountSpan = document.getElementById('debtAmount');
@@ -134,76 +183,67 @@
             const messageBox = document.getElementById('messageBox');
             const messageText = document.getElementById('messageText');
 
-            const fixedPercentageInputs = document.querySelectorAll('#debtPercent, #savingsPercent, #disposablePercent');
-            
-            // --- Dynamic Field Creation ---
-            const NUM_CUSTOM_FIELDS = 5;
-            for (let i = 1; i <= NUM_CUSTOM_FIELDS; i++) {
-                // Create input fields
-                const fieldWrapper = document.createElement('div');
-                fieldWrapper.className = 'grid grid-cols-3 gap-4 items-end';
-                
-                // Name Input
-                const nameDiv = document.createElement('div');
-                nameDiv.className = 'col-span-2';
-                nameDiv.innerHTML = `
-                    <label for="customName${i}" class="block text-sm font-medium text-gray-600 mb-1">項目 ${i} 名稱</label>
-                    <input type="text" id="customName${i}" placeholder="例如：投資、娛樂..." class="custom-name-input mt-1 block w-full px-3 py-3 border border-gray-300 rounded-md shadow-sm text-gray-900 text-base">
-                `;
-                
-                // Percentage Input
-                const percentDiv = document.createElement('div');
-                percentDiv.className = 'col-span-1';
-                percentDiv.innerHTML = `
-                     <label for="customPercent${i}" class="block text-sm font-medium text-gray-600 mb-1">%</label>
-                    <input type="number" id="customPercent${i}" value="0" min="0" max="100" class="percentage-input mt-1 block w-full px-3 py-3 border border-gray-300 rounded-md shadow-sm text-gray-900 text-lg">
-                `;
-                
-                fieldWrapper.appendChild(nameDiv);
-                fieldWrapper.appendChild(percentDiv);
-                customFieldsContainer.appendChild(fieldWrapper);
+            // --- Loan Calculator Elements ---
+            const loanPrincipalInput = document.getElementById('loanPrincipal');
+            const loanInterestRateInput = document.getElementById('loanInterestRate');
+            const loanTermInput = document.getElementById('loanTerm');
+            const rebateCheckbox = document.getElementById('rebateCheckbox');
+            const calculateLoanBtn = document.getElementById('calculateLoanBtn');
+            const loanResultsContainer = document.getElementById('loan-results-container');
+            const monthlyPaymentResultSpan = document.getElementById('monthlyPaymentResult');
+            const totalPrincipalPaidSpan = document.getElementById('totalPrincipalPaid');
+            const totalInterestPaidSpan = document.getElementById('totalInterestPaid');
+            const loanMessageBox = document.getElementById('loanMessageBox');
+            const loanMessageText = document.getElementById('loanMessageText');
+            const repaymentScheduleContainer = document.getElementById('repayment-schedule-container');
+            const repaymentScheduleHead = document.getElementById('repayment-schedule-head');
+            const repaymentScheduleBody = document.getElementById('repayment-schedule-body');
 
-                // Create result display holders
-                const resultWrapper = document.createElement('div');
-                resultWrapper.id = `customResultWrapper${i}`;
-                resultWrapper.className = 'bg-gray-100 p-4 rounded-md shadow-sm hidden';
-                resultWrapper.innerHTML = `
-                    <p class="text-lg font-medium text-gray-700 flex justify-between items-center">
-                        <span id="customResultLabel${i}">項目 ${i}</span>: 
-                        <span id="customResultAmount${i}" class="text-gray-800 text-xl font-bold">0 TWD</span>
-                    </p>
-                `;
-                customResultsContainer.appendChild(resultWrapper);
+            // --- Tab Switching Logic ---
+            function switchTab(activeTab, inactiveTab, activeContent, inactiveContent) {
+                activeTab.classList.add('active');
+                inactiveTab.classList.remove('active');
+                activeContent.classList.add('active');
+                inactiveContent.classList.remove('active');
             }
 
-            const allPercentageInputs = document.querySelectorAll('.percentage-input');
+            allocatorTab.addEventListener('click', () => switchTab(allocatorTab, loanTab, allocatorContent, loanCalculatorContent));
+            loanTab.addEventListener('click', () => switchTab(loanTab, allocatorTab, loanCalculatorContent, allocatorContent));
 
-            // --- Functions ---
-            function showMessage(message, type = 'error') {
-                messageText.textContent = message;
+            // --- Generic Helper Functions ---
+            function showMessage(box, textElem, message, type = 'error') {
+                textElem.textContent = message;
                 const classMap = {
                     error: ['bg-red-100', 'border-red-400', 'text-red-700'],
-                    success: ['bg-green-100', 'border-green-400', 'text-green-700'],
                     warning: ['bg-yellow-100', 'border-yellow-400', 'text-yellow-700']
                 };
-                messageBox.classList.remove('hidden', ...Object.values(classMap).flat());
-                messageBox.classList.add(...(classMap[type] || classMap['error']));
+                box.className = 'mt-4 p-3 rounded-md border';
+                box.classList.add(...(classMap[type] || classMap['error']));
+                box.classList.remove('hidden');
             }
 
-            function hideMessage() {
-                messageBox.classList.add('hidden');
-                messageText.textContent = '';
+            function hideMessage(box) {
+                box.classList.add('hidden');
+            }
+            
+            /**
+             * Formats a number as currency, rounding up to the nearest integer.
+             * @param {number} num - The number to format.
+             * @returns {string} The formatted currency string.
+             */
+            function formatCurrency(num) {
+                // 使用 Math.ceil() 將小數點無條件進位
+                const roundedNum = Math.ceil(num);
+                // 格式化為整數並加上千分位符號
+                return `${roundedNum.toLocaleString('en-US')} TWD`;
             }
 
+            // --- Allocator Logic ---
             function updatePercentageSummary() {
                 let totalP = 0;
-                allPercentageInputs.forEach(input => {
-                    totalP += parseFloat(input.value) || 0;
-                });
-                
+                allPercentageInputs.forEach(input => { totalP += parseFloat(input.value) || 0; });
                 const difference = totalP - 100;
                 totalPercentageSpan.textContent = `${totalP.toFixed(0)}%`;
-
                 if (totalP === 100) {
                     percentageDifferenceSpan.textContent = `0% (完美分配)`;
                     percentageDifferenceSpan.className = 'text-base font-medium text-green-600';
@@ -215,86 +255,112 @@
                     percentageDifferenceSpan.className = 'text-base font-medium text-red-500';
                 }
             }
-
-            // --- Event Listeners ---
-            allPercentageInputs.forEach(input => {
-                input.addEventListener('input', updatePercentageSummary);
-            });
-
+            allPercentageInputs.forEach(input => input.addEventListener('input', updatePercentageSummary));
             calculateBtn.addEventListener('click', () => {
-                hideMessage();
+                hideMessage(messageBox);
                 const cashIncome = parseFloat(cashIncomeInput.value);
-
                 if (isNaN(cashIncome) || cashIncome < 0) {
-                    showMessage('請輸入有效的現金收入金額。');
-                    resultsContainer.classList.add('hidden');
-                    return;
+                    showMessage(messageBox, messageText, '請輸入有效的現金收入金額。');
+                    resultsContainer.classList.add('hidden'); return;
                 }
-                
                 let totalPercentage = 0;
-                let hasInvalidPercent = false;
-                allPercentageInputs.forEach(input => {
-                    const percent = parseFloat(input.value);
-                    if (isNaN(percent) || percent < 0) {
-                        hasInvalidPercent = true;
-                    }
-                    totalPercentage += percent || 0;
-                });
-
-                if(hasInvalidPercent) {
-                    showMessage('請輸入有效的百分比 (0 或以上)。');
-                    resultsContainer.classList.add('hidden');
-                    return;
-                }
-
-                if (totalPercentage <= 0 && cashIncome > 0) {
-                    showMessage('總百分比為零，無法進行分配。');
-                    resultsContainer.classList.add('hidden');
-                    return;
-                }
-
+                allPercentageInputs.forEach(input => { totalPercentage += parseFloat(input.value) || 0; });
                 resultsContainer.classList.remove('hidden');
-
-                // --- Calculations & Display Update ---
                 const calculateAndDisplay = (percentInput, amountSpan) => {
                     const percent = parseFloat(percentInput.value) || 0;
                     const amount = (cashIncome * percent) / 100;
-                    amountSpan.textContent = `${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} TWD`;
+                    amountSpan.textContent = formatCurrency(amount);
                 };
-
-                // Fixed fields
                 calculateAndDisplay(document.getElementById('debtPercent'), debtAmountSpan);
                 calculateAndDisplay(document.getElementById('savingsPercent'), savingsAmountSpan);
                 calculateAndDisplay(document.getElementById('disposablePercent'), disposableAmountSpan);
-
-                // Custom fields
-                for (let i = 1; i <= NUM_CUSTOM_FIELDS; i++) {
-                    const nameInput = document.getElementById(`customName${i}`);
-                    const percentInput = document.getElementById(`customPercent${i}`);
-                    const percent = parseFloat(percentInput.value) || 0;
-                    const name = nameInput.value.trim() || `項目 ${i}`;
-                    
-                    const wrapper = document.getElementById(`customResultWrapper${i}`);
-                    const labelSpan = document.getElementById(`customResultLabel${i}`);
-                    const amountSpan = document.getElementById(`customResultAmount${i}`);
-                    
-                    if (percent > 0) {
-                        labelSpan.textContent = `${name}`;
-                        calculateAndDisplay(percentInput, amountSpan);
-                        wrapper.classList.remove('hidden');
-                    } else {
-                        wrapper.classList.add('hidden'); // Hide if percentage is 0
-                    }
-                }
-                
-                updatePercentageSummary(); // Update summary colors and text
+                updatePercentageSummary();
                 if (totalPercentage !== 100) {
-                    showMessage(`注意：您的百分比總和為 ${totalPercentage.toFixed(0)}%，與 100% 不符。金額將按您輸入的百分比分配。`, 'warning');
+                    showMessage(messageBox, messageText, `注意：您的百分比總和為 ${totalPercentage.toFixed(0)}%，與 100% 不符。`, 'warning');
                 }
             });
+            updatePercentageSummary();
 
-            // --- Initial State ---
-            updatePercentageSummary(); // Initial call to set summary text
+            // --- Loan Calculator Logic (Fixed Interest on Original Principal) ---
+            calculateLoanBtn.addEventListener('click', () => {
+                hideMessage(loanMessageBox);
+                repaymentScheduleContainer.classList.add('hidden');
+                repaymentScheduleHead.innerHTML = ''; // Clear old header
+                repaymentScheduleBody.innerHTML = ''; // Clear old body
+
+                const principal = parseFloat(loanPrincipalInput.value);
+                const monthlyRatePercent = parseFloat(loanInterestRateInput.value);
+                const termMonths = parseInt(loanTermInput.value, 10);
+                const hasRebate = rebateCheckbox.checked;
+
+                if (isNaN(principal) || principal <= 0 || isNaN(monthlyRatePercent) || monthlyRatePercent < 0 || isNaN(termMonths) || termMonths <= 0) {
+                    showMessage(loanMessageBox, loanMessageText, '請在本金、月利率和期數欄位中輸入有效的正數。');
+                    loanResultsContainer.classList.add('hidden');
+                    return;
+                }
+                
+                // --- Calculations ---
+                const fixedMonthlyInterest = principal * (monthlyRatePercent / 100);
+                const fixedMonthlyPrincipal = principal / termMonths;
+                const totalMonthlyPayment = fixedMonthlyInterest + fixedMonthlyPrincipal;
+                const totalInterest = fixedMonthlyInterest * termMonths;
+                
+                loanResultsContainer.classList.remove('hidden');
+
+                // --- Update Summary ---
+                monthlyPaymentResultSpan.textContent = formatCurrency(totalMonthlyPayment);
+                totalPrincipalPaidSpan.textContent = formatCurrency(principal);
+                totalInterestPaidSpan.textContent = formatCurrency(totalInterest);
+
+                // --- Generate Table Header ---
+                const headerRow = document.createElement('tr');
+                let headerHTML = `
+                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">期數</th>
+                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">償還本金</th>
+                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">償還利息</th>
+                `;
+                if (hasRebate) {
+                    headerHTML += `
+                        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">退傭 (30%)</th>
+                        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">所得小計</th>
+                    `;
+                }
+                headerHTML += `<th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">剩餘本金</th>`;
+                headerRow.innerHTML = headerHTML;
+                repaymentScheduleHead.appendChild(headerRow);
+
+
+                // --- Generate Table Body ---
+                let remainingBalance = principal;
+                for (let i = 1; i <= termMonths; i++) {
+                    const principalForMonth = fixedMonthlyPrincipal;
+                    const interestForMonth = fixedMonthlyInterest;
+                    
+                    remainingBalance -= principalForMonth;
+
+                    const row = document.createElement('tr');
+                    let rowHTML = `
+                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">${i}</td>
+                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">${formatCurrency(principalForMonth)}</td>
+                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">${formatCurrency(interestForMonth)}</td>
+                    `;
+
+                    if (hasRebate) {
+                        const rebateAmount = interestForMonth * 0.30;
+                        const subtotalIncome = principalForMonth + (interestForMonth * 0.70);
+                        rowHTML += `
+                            <td class="px-4 py-3 whitespace-nowrap text-sm text-green-600">${formatCurrency(rebateAmount)}</td>
+                            <td class="px-4 py-3 whitespace-nowrap text-sm text-blue-600 font-semibold">${formatCurrency(subtotalIncome)}</td>
+                        `;
+                    }
+                    
+                    rowHTML += `<td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 font-medium">${formatCurrency(Math.abs(remainingBalance))}</td>`;
+
+                    row.innerHTML = rowHTML;
+                    repaymentScheduleBody.appendChild(row);
+                }
+                repaymentScheduleContainer.classList.remove('hidden');
+            });
         });
     </script>
 </body>
